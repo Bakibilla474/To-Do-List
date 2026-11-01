@@ -1,26 +1,51 @@
+const taskForm = document.getElementById("task-form");
 const inputBox = document.getElementById("input-box");
 const listContainer = document.getElementById("list-container");
+let taskId = 0;
 
-function addTask(){
-    if(inputBox.value === ""){
-        alert("Please write something!");
-    }
-    else{
-        let li = document.createElement("li");
-        li.innerHTML = inputBox.value;
-        listContainer.appendChild(li);
-        let span = document.createElement("span");
-        span.innerHTML="\u00d7";
-        li.appendChild(span);
-    }
-    inputBox.value ="";
-}
-listContainer.addEventListener("click", function(e){
-    if(e.target.tagName==="LI"){
-        e.target.classList.toggle("checked");
-    }
-    else if (e.target.tagName==="SPAN"){
-        e.target.parentElement.remove();
-    }
-},false)
+taskForm.addEventListener("submit", (event) => {
+  event.preventDefault();
 
+  const taskText = inputBox.value.trim();
+  if (!taskText) {
+    inputBox.focus();
+    return;
+  }
+
+  const item = document.createElement("li");
+  item.className = "task-item";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "task-toggle";
+  checkbox.id = `task-${++taskId}`;
+
+  const label = document.createElement("label");
+  label.htmlFor = checkbox.id;
+  label.textContent = taskText;
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.className = "remove-task";
+  removeButton.setAttribute("aria-label", `Remove task: ${taskText}`);
+  removeButton.textContent = "×";
+
+  item.append(checkbox, label, removeButton);
+  listContainer.append(item);
+
+  inputBox.value = "";
+  inputBox.focus();
+});
+
+listContainer.addEventListener("change", (event) => {
+  if (event.target.matches(".task-toggle")) {
+    event.target.closest(".task-item").classList.toggle("is-complete", event.target.checked);
+  }
+});
+
+listContainer.addEventListener("click", (event) => {
+  const removeButton = event.target.closest(".remove-task");
+  if (removeButton) {
+    removeButton.closest(".task-item").remove();
+  }
+});
